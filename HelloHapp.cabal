@@ -1,0 +1,14 @@
+name:           HelloHapp
+version:        0.1
+cabal-version:  >=1.2
+build-type:     Simple
+author:         Ben James
+
+executable HelloHapp
+  hs-source-dirs:  src
+  main-is:         Main.hs
+  build-depends:   
+                   base >= 4,
+                   happstack-server >= 7.1
+  ghc-options:     -Wall
+
