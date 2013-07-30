@@ -3,10 +3,12 @@ module Views where
 
 import Model
 
+import Control.Monad           (forM)
 import Language.Haskell.HSX.QQ (hsx)
 import HSP.Monad               (HSPT)
 import HSP.XML                 (XML, fromStringLit)
 import HSP.XMLGenerator
+
 
 
 dogIndex :: (Functor m, Monad m) => (HSPT XML m) XML
@@ -15,11 +17,11 @@ dogIndex = unXMLGenT
     <html>
       <body>
         <ul>
-          <% mapM (\dog ->
+          <% forM dogs (\dog ->
             <li>
               <% name dog %>
             </li>
-          ) dogs %>
+          ) %>
         </ul>
       </body>
     </html>
