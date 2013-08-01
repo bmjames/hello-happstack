@@ -3,6 +3,7 @@ module Views where
 
 import Model
 
+import Data.Text.Lazy            (pack)
 import Language.Haskell.HSX.QQ   (hsx)
 import Happstack.Server.HSP.HTML (defaultTemplate)
 import HSP.Monad                 (HSPT)
@@ -21,7 +22,7 @@ dogIndex = defaultTemplate "Dogs Index" ()
   |]
 
 viewDog :: (Functor m, Monad m) => Dog -> (HSPT XML m) XML
-viewDog dog = defaultTemplate "Dog" ()
+viewDog dog = defaultTemplate (pack $ name dog) ()
   [hsx|
     <%>
       <h1><% name dog %></h1>
