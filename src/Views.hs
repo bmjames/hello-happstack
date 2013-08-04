@@ -6,12 +6,13 @@ import Model
 import Data.Text.Lazy            (pack)
 import Language.Haskell.HSX.QQ   (hsx)
 import Happstack.Server.HSP.HTML (defaultTemplate)
-import HSP.Monad                 (HSPT)
+import Happstack.Server.Monads   (ServerPart)
 import HSP.XML                   (XML, fromStringLit)
 import HSP.XMLGenerator
+import HSP.ServerPartT           () -- for instance XMLGenerator (ServerPartT m)
 
 
-dogIndex :: (Functor m, Monad m) => (HSPT XML m) XML
+dogIndex :: ServerPart XML
 dogIndex = defaultTemplate "Dogs Index" ()
   [hsx|
     <ul>
@@ -21,7 +22,7 @@ dogIndex = defaultTemplate "Dogs Index" ()
     </ul>
   |]
 
-viewDog :: (Functor m, Monad m) => Dog -> (HSPT XML m) XML
+viewDog :: Dog -> ServerPart XML
 viewDog dog = defaultTemplate (pack $ name dog) ()
   [hsx|
     <%>
