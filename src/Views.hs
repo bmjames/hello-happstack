@@ -4,6 +4,7 @@ module Views where
 import Model
 
 import Data.Text.Lazy            (pack)
+import Data.Char                 (toLower)
 import Language.Haskell.HSX.QQ   (hsx)
 import Happstack.Server.HSP.HTML (defaultTemplate)
 import Happstack.Server.Monads   (ServerPart)
@@ -12,15 +13,20 @@ import HSP.XMLGenerator
 import HSP.ServerPartT           () -- for instance XMLGenerator (ServerPartT m)
 
 
+
 dogIndex :: ServerPart XML
 dogIndex = defaultTemplate "Dogs Index" ()
   [hsx|
     <ul>
       <% flip map dogs (\dog ->
-        <li><% name dog %></li>
+        <li>
+          <a href=(path dog)><% name dog %></a>
+        </li>
       ) %>
     </ul>
   |]
+  where path dog = "/dog/" ++ map toLower (name dog)
+
 
 viewDog :: Dog -> ServerPart XML
 viewDog dog = defaultTemplate (pack $ name dog) ()
@@ -29,7 +35,7 @@ viewDog dog = defaultTemplate (pack $ name dog) ()
       <h1><% name dog %></h1>
       <dl>
         <dt>Age</dt>
-          <dd><% show $ age dog %></dd>
+          <dd><% age dog %></dd>
         <dt>Likes</dt>
           <dd><% likes dog %></dd>
       </dl>
