@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
-module Views where
+module Views (vote, dogIndex, viewDog) where
 
 import Model
 
@@ -18,8 +18,7 @@ import HSP.ServerPartT           ()
 
 -- a pointless hit counter, just to demonstrate sharing state across threads
 vote :: MVar Int -> ServerPart XML
-vote counter = do newCount <- lift $ modifyMVar counter $ \n ->
-                    let n' = n + 1 in return (n', n')
+vote counter = do newCount <- lift $ incrementMVar counter
                   defaultTemplate "Vote counter" ()
                     [hsx| <h1><% newCount %> votes!</h1> |]
 
@@ -51,3 +50,6 @@ viewDog dog = defaultTemplate (pack $ name dog) ()
       </dl>
     </%>
   |]
+
+incrementMVar :: (Num a) => MVar a -> IO a
+incrementMVar mvar = modifyMVar mvar $ \n -> let n' = n + 1 in return (n', n')
