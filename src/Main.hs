@@ -3,12 +3,15 @@ module Main where
 import Views
 
 import Control.Monad (msum)
+import Control.Concurrent.MVar (newMVar)
 import Happstack.Server
 import Happstack.Server.HSP.HTML ()
 
 
 main :: IO ()
-main = simpleHTTP nullConf $ msum [
-           dir "dogs" $ nullDir >> dogIndex
-         , dir "dog"  $ path $ (nullDir >>) . viewDog
-         ]
+main = do voteCounter <- newMVar 0
+          simpleHTTP nullConf $ msum [
+              dir "vote" $ nullDir >> vote voteCounter
+            , dir "dogs" $ nullDir >> dogIndex
+            , dir "dog"  $ path $ (nullDir >>) . viewDog
+            ]
