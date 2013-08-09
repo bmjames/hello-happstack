@@ -7,7 +7,7 @@ author:         Ben James
 executable HelloHapp
   hs-source-dirs:  src
   main-is:         Main.hs
-  build-depends:   
+  build-depends:
                    base >= 4,
                    happstack-server >= 7.1.0,
                    happstack-hsp >= 7.1.0,
@@ -15,8 +15,8 @@ executable HelloHapp
                    hsp >= 0.9.2,
                    hsx2hs >= 0.13,
                    text >= 0.11.3,
-                   mtl  >= 2.1.2
+                   mtl  >= 2.1.1
   ghc-options:     -Wall
-  other-modules:   
+  other-modules:
                    Model,
                    Views
