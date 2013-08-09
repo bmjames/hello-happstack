@@ -22,6 +22,9 @@ vote counter = do newCount <- lift $ incrementMVar counter
                   defaultTemplate "Vote counter" ()
                     [hsx| <h1><% newCount %> votes!</h1> |]
 
+incrementMVar :: (Num a) => MVar a -> IO a
+incrementMVar mvar = modifyMVar mvar $ \n -> let n' = n + 1 in return (n', n')
+
 -- lists all the dogs that we know of
 dogIndex :: ServerPart XML
 dogIndex = defaultTemplate "Dogs Index" ()
@@ -50,6 +53,3 @@ viewDog dog = defaultTemplate (pack $ name dog) ()
       </dl>
     </%>
   |]
-
-incrementMVar :: (Num a) => MVar a -> IO a
-incrementMVar mvar = modifyMVar mvar $ \n -> let n' = n + 1 in return (n', n')
