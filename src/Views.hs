@@ -1,33 +1,33 @@
 {-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
-module Views (vote, dogIndex, viewDog) where
+module Views where
 
 import Model
 
 import Control.Concurrent.MVar   (MVar, modifyMVar)
-import Data.Text.Lazy            (pack)
-import Data.Char                 (toLower)
 import Control.Monad.Trans       (lift)
-
+import Data.Char                 (toLower)
+import Data.Aeson                (Value, encode, toJSON, object, (.=))
 import Language.Haskell.HSX.QQ   (hsx)
-import Happstack.Server.HSP.HTML (defaultTemplate)
 import Happstack.Server.Monads   (ServerPart)
-import HSP.XML                   (XML, fromStringLit)
+import Happstack.Server.Response (ToMessage(..), ok, flatten)
+import Happstack.Server.Types    (Response)
+import Happstack.Server.HSP.HTML (defaultTemplate)
+import HSP.XML                   (fromStringLit)
 import HSP.XMLGenerator
 import HSP.ServerPartT           ()
 
 
 -- a pointless hit counter, just to demonstrate sharing state across threads
-vote :: MVar Int -> ServerPart XML
+vote :: MVar Int -> ServerPart Response
 vote counter = do newCount <- lift $ incrementMVar counter
-                  defaultTemplate "Vote counter" ()
-                    [hsx| <h1><% newCount %> votes!</h1> |]
+                  ok $ toResponse $ object [ "votes" .= newCount ]
 
 incrementMVar :: (Num a) => MVar a -> IO a
 incrementMVar mvar = modifyMVar mvar $ \n -> let n' = n + 1 in return (n', n')
 
 -- lists all the dogs that we know of
-dogIndex :: ServerPart XML
-dogIndex = defaultTemplate "Dogs Index" ()
+dogIndex :: ServerPart Response
+dogIndex = flatten $ defaultTemplate "Dogs Index" ()
   [hsx|
     <ul>
       <% flip map dogs (\dog ->
@@ -40,16 +40,9 @@ dogIndex = defaultTemplate "Dogs Index" ()
   where path dog = "/dog/" ++ map toLower (name dog)
 
 -- detailed view of a single dog
-viewDog :: Dog -> ServerPart XML
-viewDog dog = defaultTemplate (pack $ name dog) ()
-  [hsx|
-    <%>
-      <h1><% name dog %></h1>
-      <dl>
-        <dt>Age</dt>
-          <dd><% age dog %></dd>
-        <dt>Likes</dt>
-          <dd><% likes dog %></dd>
-      </dl>
-    </%>
-  |]
+viewDog :: Dog -> ServerPart Response
+viewDog = ok . toResponse . toJSON
+
+instance ToMessage Value where
+  toContentType _ = "application/json; charset=utf-8"
+  toMessage       = encode

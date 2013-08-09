@@ -1,8 +1,10 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Model where
 
-import Data.Char (toLower)
-import Data.List (find)
+import Data.Char        (toLower)
+import Data.List        (find)
 import Happstack.Server (FromReqURI(..))
+import Data.Aeson       (ToJSON(..), object, (.=))
 
 
 data Dog = Dog { name  :: String
@@ -21,3 +23,10 @@ dogs = [ Dog "Fluffles" 3 "treats"
        
 findDog :: String -> Maybe Dog
 findDog n = find ((== n) . map toLower . name) dogs
+
+instance ToJSON Dog where
+  toJSON (Dog name age likes) =
+    object [ "name"  .= name
+           , "age"   .= age
+           , "likes" .= likes
+           ]
