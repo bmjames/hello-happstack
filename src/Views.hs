@@ -5,7 +5,7 @@ import Model
 
 import Control.Concurrent.MVar   (MVar, modifyMVar)
 import Control.Monad.Trans       (lift)
-import Data.Char                 (toLower)
+import Data.Text                 (append, toLower)
 import Data.Aeson                (Value, encode, toJSON, object, (.=))
 import Language.Haskell.HSX.QQ   (hsx)
 import Happstack.Server.Monads   (ServerPart)
@@ -37,7 +37,7 @@ dogIndex = flatten $ defaultTemplate "Dogs Index" ()
       ) %>
     </ul>
   |]
-  where path dog = "/dog/" ++ map toLower (name dog)
+  where path = append "/dog/" . toLower . name
 
 -- detailed view of a single dog
 viewDog :: Dog -> ServerPart Response
