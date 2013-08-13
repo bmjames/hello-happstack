@@ -3,8 +3,12 @@ hello-happstack
 
 A "Hello World" project using happstack-server and HSP.
 
-To run,
+Installation requires hsx2hs, which can be installed using
 
-    $ cabal install
-    $ HelloHapp
+    $ cabal install --global hsx2hs
+
+Then install and run HelloHapp:
+
+    $ cabal-dev install
+    $ ./cabal-dev/bin/HelloHapp
 
