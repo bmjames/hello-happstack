@@ -6,7 +6,7 @@ import Model
 import Control.Concurrent.MVar   (MVar, modifyMVar)
 import Control.Monad.Trans       (lift)
 import Data.Text                 (append, toLower)
-import Data.Aeson                (Value, encode, toJSON, object, (.=))
+import Data.Aeson                (Value, encode, toJSON, object, (.=), ToJSON)
 import Language.Haskell.HSX.QQ   (hsx)
 import Happstack.Server.Monads   (ServerPart)
 import Happstack.Server.Response (ToMessage(..), ok, flatten)
@@ -20,7 +20,7 @@ import HSP.ServerPartT           ()
 -- a pointless hit counter, just to demonstrate sharing state across threads
 vote :: MVar Int -> ServerPart Response
 vote counter = do newCount <- lift $ incrementMVar counter
-                  ok $ toResponse $ object [ "votes" .= newCount ]
+                  ok $ jsonResponse $ object [ "votes" .= newCount ]
 
 incrementMVar :: (Num a) => MVar a -> IO a
 incrementMVar mvar = modifyMVar mvar $ \n -> let n' = n + 1 in return (n', n')
@@ -41,8 +41,13 @@ dogIndex = flatten $ defaultTemplate "Dogs Index" ()
 
 -- detailed view of a single dog
 viewDog :: Dog -> ServerPart Response
-viewDog = ok . toResponse . toJSON
+viewDog = ok . jsonResponse
 
-instance ToMessage Value where
+newtype JsonResponse = JsonResponse Value
+
+jsonResponse :: ToJSON a => a -> Response
+jsonResponse = toResponse . JsonResponse . toJSON
+
+instance ToMessage JsonResponse where
   toContentType _ = "application/json; charset=utf-8"
-  toMessage       = encode
+  toMessage (JsonResponse value) = encode value

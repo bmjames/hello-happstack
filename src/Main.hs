@@ -2,7 +2,6 @@
 module Main where
 
 import Views
-
 import Control.Monad           (msum)
 import Control.Concurrent.MVar (newMVar)
 import Happstack.Server
