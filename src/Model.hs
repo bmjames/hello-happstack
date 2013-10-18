@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Model where
+module Model (Dog(..), dogs, findDog) where
 
 import Data.List        (find)
 import Data.Text        (Text, toLower, pack)
 import Data.Aeson       (ToJSON(..), object, (.=), Value)
 import Data.Aeson.Types (Pair)
-import Happstack.Server (FromReqURI(..))
 
 
 data Dog = Dog { name  :: Text
@@ -13,17 +12,16 @@ data Dog = Dog { name  :: Text
                , likes :: Text
                } deriving Show
 
-instance FromReqURI Dog where
-  fromReqURI = findDog
-
 -- Database of dogs
 dogs :: [Dog]
 dogs = [ Dog "Fluffles" 3 "treats"
        , Dog "Snuffles" 5 "digging"
        ]
-       
-findDog :: String -> Maybe Dog
-findDog n = find ((== pack n) . toLower . name) dogs
+
+-- Simulate a real database lookup by putting the result into IO
+findDog :: String -> IO (Maybe Dog)
+findDog n = return $
+  find ((== pack n) . toLower . name) dogs
 
 instance ToJSON Dog where
   toJSON = asObject [ name  `as` "name"
