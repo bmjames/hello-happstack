@@ -8,6 +8,7 @@ import Control.Monad.Trans       (liftIO)
 import Control.Monad             ((<=<))
 import Data.Text                 (append, toLower)
 import Data.Aeson                (Value, encode, toJSON, object, (.=), ToJSON)
+import Data.Traversable          (for)
 import Language.Haskell.HSX.QQ   (hsx)
 import Happstack.Server.Monads   (ServerPart)
 import Happstack.Server.Response (ToMessage(..), ok, notFound, flatten)
@@ -33,7 +34,7 @@ dogIndex = do
   flatten $ defaultTemplate "Dogs Index" ()
     [hsx|
       <ul>
-        <% flip map dogs (\dog ->
+        <% for dogs (\dog ->
           <li>
             <a href=(path dog)><% name dog %></a>
           </li>
