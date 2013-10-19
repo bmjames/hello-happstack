@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
-module Views where
+module Views (vote, dogIndex, viewDog) where
 
 import Model
 
@@ -18,7 +18,7 @@ import HSP.XMLGenerator
 import HSP.ServerPartT           ()
 
 
--- a pointless hit counter, just to demonstrate sharing state across threads
+-- | Pointless hit counter, just to demonstrate sharing state across threads.
 vote :: MVar Int -> ServerPart Response
 vote counter = do newCount <- liftIO $ incrementMVar counter
                   ok . jsonResponse $ object [ "votes" .= newCount ]
@@ -26,7 +26,7 @@ vote counter = do newCount <- liftIO $ incrementMVar counter
 incrementMVar :: (Num a) => MVar a -> IO a
 incrementMVar mvar = modifyMVar mvar $ \n -> let n' = n + 1 in return (n', n')
 
--- lists all the dogs that we know of
+-- | Lists all dogs in the database.
 dogIndex :: ServerPart Response
 dogIndex = do
   dogs <- liftIO allDogs
@@ -42,7 +42,7 @@ dogIndex = do
    |]
   where path = append "/dog/" . toLower . name
 
--- detailed view of a single dog
+-- | Detailed view of a single dog.
 viewDog :: String -> ServerPart Response
 viewDog = dogResponse <=< liftIO . findDog
   where dogResponse = maybe notFoundError (ok . jsonResponse)
