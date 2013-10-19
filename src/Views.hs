@@ -4,7 +4,7 @@ module Views where
 import Model
 
 import Control.Concurrent.MVar   (MVar, modifyMVar)
-import Control.Monad.Trans       (lift, liftIO)
+import Control.Monad.Trans       (liftIO)
 import Control.Monad             ((<=<))
 import Data.Text                 (append, toLower)
 import Data.Aeson                (Value, encode, toJSON, object, (.=), ToJSON)
@@ -20,7 +20,7 @@ import HSP.ServerPartT           ()
 
 -- a pointless hit counter, just to demonstrate sharing state across threads
 vote :: MVar Int -> ServerPart Response
-vote counter = do newCount <- lift $ incrementMVar counter
+vote counter = do newCount <- liftIO $ incrementMVar counter
                   ok . jsonResponse $ object [ "votes" .= newCount ]
 
 incrementMVar :: (Num a) => MVar a -> IO a
@@ -28,22 +28,22 @@ incrementMVar mvar = modifyMVar mvar $ \n -> let n' = n + 1 in return (n', n')
 
 -- lists all the dogs that we know of
 dogIndex :: ServerPart Response
-dogIndex = flatten $ defaultTemplate "Dogs Index" ()
-  [hsx|
-    <ul>
-      <% flip map dogs (\dog ->
-        <li>
-          <a href=(path dog)><% name dog %></a>
-        </li>
-      ) %>
-    </ul>
-  |]
+dogIndex = do
+  dogs <- liftIO allDogs
+  flatten $ defaultTemplate "Dogs Index" ()
+    [hsx|
+      <ul>
+        <% flip map dogs (\dog ->
+          <li>
+            <a href=(path dog)><% name dog %></a>
+          </li>
+        ) %>
+     </ul>
+   |]
   where path = append "/dog/" . toLower . name
 
-type DogID = String
-
 -- detailed view of a single dog
-viewDog :: DogID -> ServerPart Response
+viewDog :: String -> ServerPart Response
 viewDog = dogResponse <=< liftIO . findDog
   where dogResponse = maybe notFoundError (ok . jsonResponse)
 
